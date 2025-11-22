@@ -1,6 +1,21 @@
 // ============================================
-// FLOWZONE AI - PART 4: UI, FEATURES & INTEGRATION - FIXED
+// FLOWZONE AI - PART 4: UI, FEATURES & INTEGRATION - COMPLETE FIXED
+// Replace your entire app-part4-ui.js with this file
 // ============================================
+
+// Fallback if marked.js doesn't load
+if (typeof marked === 'undefined') {
+  window.marked = {
+    parse: (text) => {
+      return text
+        .replace(/### (.*)/g, '<h3>$1</h3>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\* /g, '• ')
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/\n/g, '<br>');
+    }
+  };
+}
 
 // ============================================
 // EVENT LISTENERS
@@ -174,13 +189,13 @@ function handleTabChange(sectionId) {
   
   if (sectionId === "ai-coach" && !state.apiKey) {
     setTimeout(() => {
-      showNotification("💡 Add your Gemini API key to unlock AI coaching features!", 5000);
+      showNotification("💡 Add your Gemini API key in Settings to unlock AI-powered coaching!", 5000);
     }, 500);
   }
 }
 
 // ============================================
-// AI CHAT FUNCTIONALITY - FIXED
+// AI CHAT FUNCTIONALITY - COMPLETE FIXED
 // ============================================
 
 function sendMessage() {
@@ -227,7 +242,7 @@ function sendMessage() {
     setTimeout(() => {
       removeChatMessage(thinkingId);
       const response = getFallbackResponse(text);
-      addChatMessage(response + "\n\n💡 Add API key in Settings for AI-powered coaching!", "bot");
+      addChatMessage(response + "\n\n💡 *Add API key in Settings for AI-powered coaching!*", "bot");
       
       input.disabled = false;
       if (sendBtn) sendBtn.disabled = false;
@@ -248,13 +263,26 @@ function addChatMessage(text, type, id) {
   const icon = isBot ? "brain" : "user";
   const author = isBot ? "FlowZone AI" : "You";
   
+  // Convert markdown to HTML for bot messages
+  let processedText = text;
+  if (isBot && typeof marked !== 'undefined') {
+    try {
+      processedText = marked.parse(text);
+    } catch (e) {
+      console.error("Markdown parsing error:", e);
+      processedText = escapeHtml(text).replace(/\n/g, '<br>');
+    }
+  } else {
+    processedText = escapeHtml(text).replace(/\n/g, '<br>');
+  }
+  
   messageDiv.innerHTML = `
     <div class="message-avatar">
       <i data-lucide="${icon}"></i>
     </div>
     <div class="message-content">
       <div class="message-author">${author}</div>
-      <p>${escapeHtml(text).replace(/\n/g, '<br>')}</p>
+      <div class="message-text">${processedText}</div>
     </div>
   `;
   
@@ -277,21 +305,38 @@ async function sendToGeminiAI(userText) {
     sessionTime: Math.floor(state.sessionTime / 60),
     isTracking: state.isTracking,
     streak: state.currentStreak,
-    totalSessions: state.totalSessions
+    totalSessions: state.totalSessions,
+    tabSwitches: state.tabSwitches,
+    avgTyping: calculateAverage(state.typingSpeed).toFixed(0)
   };
   
-  const prompt = `You are FlowZone AI, an expert focus and productivity coach. Provide helpful, encouraging, and actionable advice.
+  const prompt = `You are FlowZone AI, an expert focus and productivity coach. You provide detailed, actionable advice with proper structure.
 
 USER CONTEXT:
-- Current Flow Score: ${context.flowScore}%
+- Current Flow Score: ${context.flowScore}% ${context.flowScore >= 80 ? '(Excellent!)' : context.flowScore >= 60 ? '(Good)' : '(Needs improvement)'}
 - Session Duration: ${context.sessionTime} minutes
-- Currently Tracking: ${context.isTracking ? 'Yes' : 'No'}
-- Streak: ${context.streak} days
-- Total Sessions: ${context.totalSessions}
+- Currently Tracking: ${context.isTracking ? 'Yes ✓' : 'No'}
+- Current Streak: ${context.streak} days ${context.streak >= 7 ? '🔥' : ''}
+- Total Sessions Completed: ${context.totalSessions}
+- Tab Switches Today: ${context.tabSwitches}
+- Typing Speed: ${context.avgTyping} keys/min
 
 USER QUESTION: "${userText}"
 
-Provide specific, actionable advice in 2-4 sentences. Be encouraging and reference their context when relevant.`;
+INSTRUCTIONS:
+1. Provide a comprehensive, detailed response (4-8 sentences minimum)
+2. Reference the user's specific context and metrics when relevant
+3. Structure your response with clear sections if needed
+4. Use markdown formatting:
+   - **Bold** for emphasis
+   - Use bullet points (•) for lists
+   - Use numbers (1., 2., 3.) for steps
+   - Use ### for section headers if needed
+5. Be encouraging and specific
+6. Include actionable advice they can implement immediately
+7. If their metrics are good, praise them. If struggling, provide solutions.
+
+Respond in markdown format with proper structure.`;
 
   try {
     const response = await fetch(`${CONFIG.GEMINI_API_URL}?key=${state.apiKey}`, {
@@ -303,8 +348,8 @@ Provide specific, actionable advice in 2-4 sentences. Be encouraging and referen
         }],
         generationConfig: { 
           temperature: 0.7, 
-          maxOutputTokens: 400,
-          topP: 0.8,
+          maxOutputTokens: 800,
+          topP: 0.9,
           topK: 40
         }
       })
@@ -312,7 +357,7 @@ Provide specific, actionable advice in 2-4 sentences. Be encouraging and referen
     
     if (!response.ok) {
       if (response.status === 429) {
-        throw new Error("API quota exceeded. Wait a minute or create a new API key at https://aistudio.google.com/app/apikey");
+        throw new Error("API quota exceeded. Wait 60 seconds or create a new API key at https://aistudio.google.com/app/apikey");
       }
       const errorData = await response.json().catch(() => ({}));
       throw new Error(`API error (${response.status}): ${errorData.error?.message || 'Unknown error'}`);
@@ -320,7 +365,6 @@ Provide specific, actionable advice in 2-4 sentences. Be encouraging and referen
     
     const data = await response.json();
     
-    // Extract text from response
     if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
       const aiText = data.candidates[0].content.parts[0].text;
       return aiText.trim();
@@ -338,34 +382,243 @@ function getFallbackResponse(text) {
   const lower = text.toLowerCase();
   
   if (lower.includes("focus") || lower.includes("concentrate")) {
-    return "🎯 To improve focus: 1) Eliminate distractions (close tabs, silence phone), 2) Use Pomodoro (25 min work, 5 min break), 3) Start tracking now to identify your patterns!";
+    return `### 🎯 Improving Your Focus
+
+Here are proven strategies to enhance concentration:
+
+**1. Environment Optimization**
+• Eliminate visual and auditory distractions
+• Close unnecessary browser tabs (you have ${state.tabSwitches} switches today)
+• Use noise-canceling headphones or ambient sound
+
+**2. Technique Implementation**
+• **Pomodoro Technique**: 25 minutes focused work, 5 minute breaks
+• **Time Blocking**: Schedule specific tasks for specific hours
+• **Single-Tasking**: Focus on ONE thing at a time
+
+**3. Leverage FlowZone**
+• Start tracking now to identify your peak hours
+• Your current flow score: **${state.flowScore}%**
+• Monitor your behavioral patterns in real-time
+
+**Pro Tip**: Your streak is ${state.currentStreak} days! Keep building that momentum. Consistency creates focus.`;
   }
   
   if (lower.includes("procrastinat") || lower.includes("motivat")) {
-    return "⚡ Beat procrastination: Break tasks into 5-minute chunks, use the 2-minute rule (do it if <2min), and start a session right now - momentum creates motivation!";
+    return `### ⚡ Beating Procrastination
+
+**The Psychology**: Procrastination isn't laziness—it's fear of discomfort. Here's how to overcome it:
+
+**Immediate Actions:**
+1. **2-Minute Rule**: If it takes <2 minutes, do it NOW
+2. **5-Minute Promise**: Commit to just 5 minutes. Usually, you'll continue
+3. **Break It Down**: Divide big tasks into tiny, manageable chunks
+
+**Momentum Building:**
+• Start your FlowZone session RIGHT NOW (seriously, click Start!)
+• The act of beginning creates motivation—not the other way around
+• Your ${state.totalSessions} completed sessions prove you CAN do this
+
+**Reward System:**
+• Small wins → Dopamine → More motivation
+• Track with FlowZone to see progress visually
+• Celebrate each completed session
+
+**Remember**: Action creates motivation. You have a ${state.currentStreak}-day streak. Don't break it!`;
   }
   
   if (lower.includes("distract") || lower.includes("interrupt")) {
-    return "🧠 Manage distractions: Use website blockers, wear headphones, set specific times for messages. Your tab switches are tracked - try to minimize them!";
+    return `### 🧠 Mastering Distraction Management
+
+**Your Current Stats**: ${state.tabSwitches} tab switches detected. Let's minimize that!
+
+**Digital Distractions:**
+1. **Website Blockers**: Freedom, Cold Turkey, or browser extensions
+2. **App Limits**: Use Screen Time (iOS) or Digital Wellbeing (Android)
+3. **Notification Silence**: Turn on Do Not Disturb mode
+
+**Physical Environment:**
+• Wear headphones (even without music = "I'm focused" signal)
+• Close your door or use "busy" indicators
+• Keep phone in another room or drawer
+
+**Mindset Shifts:**
+• **Timeboxing**: "I'll check messages at 10, 2, and 4 PM only"
+• **OHIO Principle**: Only Handle It Once (decide → do → done)
+• **90-Minute Blocks**: Our natural attention cycle
+
+**FlowZone Helps:**
+• We track your tab switches (currently ${state.tabSwitches})
+• Real-time alerts when you lose focus
+• Identify your distraction patterns over time
+
+Start a session now and see your patterns!`;
   }
   
   if (lower.includes("habit") || lower.includes("routine")) {
-    return "📚 Build habits: Stack new habits onto existing ones, make it easy, track daily. FlowZone helps - start sessions consistently to build your streak!";
+    return `### 📚 Building Unbreakable Habits
+
+**Your Foundation**: ${state.currentStreak} day streak! You're already proving you can build habits.
+
+**The Science:**
+1. **Habit Stacking**: Attach new habits to existing ones
+   - Example: "After my morning coffee, I'll start FlowZone"
+2. **Make It Easy**: Reduce friction to starting
+   - Your setup: One click → Start Session → Flow state
+3. **Make It Satisfying**: Track progress visually
+   - FlowZone dashboard shows your improvement
+
+**The 4 Laws of Habit Formation:**
+• **Cue**: Make it obvious (FlowZone bookmark visible)
+• **Craving**: Make it attractive (gamification with streaks)
+• **Response**: Make it easy (one-click start)
+• **Reward**: Make it satisfying (see your progress)
+
+**Your Action Plan:**
+1. Set a specific time daily (e.g., "9 AM every workday")
+2. Start small (even 10 minutes counts)
+3. Never break the chain twice in a row
+4. Use FlowZone to track consistency
+
+**Stats Show**: After 21 days, it becomes automatic. You're at day ${state.currentStreak}!`;
   }
   
   if (lower.includes("break") || lower.includes("tired") || lower.includes("rest")) {
-    return "🧘 Smart breaks: Use 52-17 rule (52 min work, 17 min break) or Pomodoro. During breaks: move, look away, hydrate. Try our Breathing Exercise!";
+    return `### 🧘 Strategic Break Planning
+
+**Current Fatigue**: Your session is ${Math.floor(state.sessionTime / 60)} minutes. Here's your break strategy:
+
+**Optimal Break Patterns:**
+1. **Pomodoro (25/5)**: 25 min work, 5 min break → Great for starting
+2. **52/17 Rule**: 52 min work, 17 min break → Backed by research
+3. **90-Minute Ultradian**: 90 min work, 20 min break → Deep work cycles
+
+**What to Do During Breaks:**
+• **Physical**: Stand, stretch, walk (even 2 minutes helps)
+• **Visual**: Look away from screen (20-20-20 rule: every 20 min, look 20 feet away, 20 seconds)
+• **Hydration**: Drink water (dehydration kills focus)
+• **Breathing**: Try our 4-4-4-4 exercise (Breathing button)
+
+**What NOT to Do:**
+• ❌ Social media (triggers dopamine → hard to return to work)
+• ❌ News scrolling (increases anxiety)
+• ❌ Email checking (creates new tasks mentally)
+
+**When to Break:**
+• Fatigue Level > 70% (FlowZone tracks this!)
+• After completing a milestone
+• When flow score drops below 40%
+
+**Pro Tip**: Schedule breaks BEFORE you're exhausted. Prevention > Recovery.`;
   }
   
   if (lower.includes("product") || lower.includes("efficient")) {
-    return "💪 Boost productivity: Work in peak hours (check Dashboard), single-task, use FlowZone to track patterns. Your current streak: " + state.currentStreak + " days!";
+    return `### 💪 Maximizing Your Productivity
+
+**Your Current Performance**: 
+• Flow Score: **${state.flowScore}%** ${state.flowScore >= 70 ? '(Excellent!)' : '(Room for improvement)'}
+• Streak: **${state.currentStreak} days** ${state.currentStreak >= 7 ? '🔥' : ''}
+• Total Sessions: **${state.totalSessions}**
+
+**The Productivity Trinity:**
+
+**1. Energy Management** (More important than time!)
+• **Peak Hours**: Check your Dashboard → Find your 90%+ flow times
+• **Chronotype**: Are you a morning lark or night owl?
+• **Nutrition**: Protein + complex carbs = sustained focus
+
+**2. Priority Management**
+• **Eisenhower Matrix**: Urgent/Important quadrants
+• **MIT Method**: 3 Most Important Tasks per day
+• **Eat the Frog**: Hardest task first (when willpower is highest)
+
+**3. System Optimization**
+• **Single-Tasking**: 40% more productive than multitasking
+• **Deep Work Blocks**: 90-120 minutes of uninterrupted focus
+• **Batch Processing**: Group similar tasks together
+
+**FlowZone Insights:**
+Your dashboard shows patterns you can't see without data. After ${state.totalSessions} sessions, you should see:
+• Which hours you perform best
+• How long your optimal sessions are
+• What breaks your flow
+
+**Action Step**: Complete 7 more sessions this week to establish your baseline. Then optimize!`;
   }
   
-  if (lower.includes("time") || lower.includes("manage")) {
-    return "⏰ Time management: Time-block your calendar, batch similar tasks, prioritize with Eisenhower Matrix. Use FlowZone to find your optimal work hours!";
+  if (lower.includes("time") || lower.includes("manage") || lower.includes("schedule")) {
+    return `### ⏰ Mastering Time Management
+
+**Your Time Stats**: ${state.totalSessions} sessions completed, ${state.currentStreak}-day streak!
+
+**Core Principles:**
+
+**1. Time Blocking** (Most Effective)
+• Block specific hours for specific tasks
+• Example: 9-11 AM = Deep work, 2-3 PM = Meetings, 4-5 PM = Admin
+• Your Dashboard shows YOUR best hours
+
+**2. Priority Systems**
+• **Eisenhower Matrix**: 
+  - Urgent + Important = Do first
+  - Important + Not Urgent = Schedule
+  - Urgent + Not Important = Delegate
+  - Neither = Eliminate
+• **Warren Buffett's 5/25 Rule**: Focus on top 5 goals only
+
+**3. Batching Technique**
+• Group similar tasks together
+• Check email 3x daily (not constantly)
+• Make all calls in one block
+• Process admin tasks together
+
+**FlowZone Integration:**
+1. Start session for each time block
+2. Track which blocks produce highest flow
+3. Adjust schedule based on data
+4. Your current flow: ${state.flowScore}%
+
+**Reality Check**: You can't manage time. You can only manage yourself. FlowZone helps you understand YOUR optimal patterns.`;
   }
   
-  return "💡 Great question! Start a focus session to let FlowZone analyze your patterns. Check Quick Actions for Breathing exercises, Pomodoro mode, or export your data!";
+  return `### 💡 Focus & Productivity Coaching
+
+**Your Current Status:**
+• Flow Score: ${state.flowScore}%
+• Active Session: ${state.isTracking ? 'Yes ✓' : 'No'}
+• Current Streak: ${state.currentStreak} days
+• Total Sessions: ${state.totalSessions}
+
+**I can help you with:**
+
+**Focus & Concentration**
+• Improving attention span
+• Eliminating distractions
+• Creating optimal work environment
+
+**Productivity Systems**
+• Time management techniques
+• Building effective routines
+• Optimizing your schedule
+
+**Habit Formation**
+• Creating lasting behavioral changes
+• Tracking progress effectively
+• Maintaining motivation
+
+**Quick Actions Available:**
+• **Breathing Exercise**: 4-4-4-4 calming technique
+• **Pomodoro Mode**: Structured work intervals
+• **Focus Tips**: Environment optimization
+• **Export Data**: Download your sessions
+
+**Try asking:**
+• "How to focus better?"
+• "Beat procrastination strategies"
+• "When should I take breaks?"
+• "How to build better habits?"
+
+Start tracking now to unlock personalized insights! 🚀`;
 }
 
 // ============================================
@@ -646,6 +899,10 @@ function playFocusSound(type = "start") {
   }
 }
 
+// ============================================
+// ADD STYLES
+// ============================================
+
 const style = document.createElement("style");
 style.textContent = `
   @keyframes slideIn {
@@ -656,7 +913,7 @@ style.textContent = `
     from { opacity: 1; transform: translateX(0); }
     to { opacity: 0; transform: translateX(100px); }
   }
-    @keyframes fadeIn {
+  @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
   }
@@ -664,8 +921,21 @@ style.textContent = `
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.1); }
   }
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .message-text {
+    animation: fadeInUp 0.4s ease;
+  }
 `;
 document.head.appendChild(style);
 
-console.log("✅ Part 4 loaded: UI & Features with Voice Input");
+console.log("✅ Part 4 loaded: UI & Features with Voice Input + Markdown");
 console.log("🎉 FlowZone AI FULLY LOADED - All systems operational!");
