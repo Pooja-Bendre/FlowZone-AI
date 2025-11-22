@@ -444,6 +444,8 @@
            </button>
           </div>
 
+     </div> <!-- End of container -->
+
     <!-- Modal for API Key Setup -->
     <div class="modal hidden" id="apiModal">
       <div class="modal-content">
@@ -467,7 +469,7 @@
         </div>
         <p class="api-help">
           Get your free API key at:
-          <a href="https://makersuite.google.com/app/apikey" target="_blank"
+          <a href="https://aistudio.google.com/app/apikey" target="_blank"
             >Google AI Studio</a
           >
         </p>
@@ -475,13 +477,15 @@
     </div>
 
     <!-- Scripts -->
-    <!-- At the bottom of index.html, replace the scripts section: -->
+    <!-- Marked.js for Markdown rendering -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <!-- Scripts - Load in order -->
+    
+    <!-- Load app scripts in order -->
     <script src="app-part1-core.js"></script>
     <script src="app-part2-ai.js"></script>
     <script src="app-part3-session.js"></script>
     <script src="app-part4-ui.js"></script>
+    
     <script>
       // Initialize Lucide icons
       if (typeof lucide !== "undefined") {
@@ -490,4 +494,3 @@
     </script>
   </body>
 </html>
-
