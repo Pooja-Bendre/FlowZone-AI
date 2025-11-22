@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FlowZone AI - Your Intelligent Focus Companion</title>
+    <link rel="stylesheet" href="styles.css" />
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+  </head>
+  <body>
+    <!-- Animated Background -->
+    <div class="animated-bg">
+      <div class="bg-orb bg-orb-1"></div>
+      <div class="bg-orb bg-orb-2"></div>
+      <div class="bg-orb bg-orb-3"></div>
+    </div>
+
+    <div class="container">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-content">
+          <div class="logo-section">
+            <div class="logo-icon">
+              <i data-lucide="brain"></i>
+            </div>
+            <div class="logo-text">
+              <h1 class="main-title">FlowZone AI</h1>
+              <p class="subtitle">Your Intelligent Focus Companion</p>
+            </div>
+          </div>
+          <div class="header-actions">
+            <div class="streak-badge">
+              <i data-lucide="award"></i>
+              <span id="streakCount">1</span> Day Streak
+            </div>
+            <button class="icon-btn" id="settingsBtn">
+              <i data-lucide="settings"></i>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Navigation -->
+      <nav class="nav-tabs">
+        <button class="nav-tab active" data-section="home">
+          <i data-lucide="brain"></i>
+          <span>Focus</span>
+        </button>
+        <button class="nav-tab" data-section="dashboard">
+          <i data-lucide="bar-chart-3"></i>
+          <span>Dashboard</span>
+        </button>
+        <button class="nav-tab" data-section="ai-coach">
+          <i data-lucide="message-square"></i>
+          <span>AI Coach</span>
+        </button>
+      </nav>
+
+      <!-- Home Section -->
+      <section id="home" class="section active">
+        <div class="grid-2">
+          <!-- Flow Meter Card -->
+          <div class="card">
+            <div class="flow-meter-container">
+              <h2 class="card-title">Flow State Monitor</h2>
+
+              <!-- Circular Progress -->
+              <div class="circular-progress">
+                <svg class="progress-ring" width="256" height="256">
+                  <circle
+                    class="progress-ring-bg"
+                    cx="128"
+                    cy="128"
+                    r="120"
+                  ></circle>
+                  <circle
+                    class="progress-ring-fill"
+                    cx="128"
+                    cy="128"
+                    r="120"
+                    id="progressCircle"
+                  ></circle>
+                </svg>
+                <div class="progress-content">
+                  <div class="flow-score" id="flowScore">0</div>
+                  <div class="flow-status" id="flowStatus">
+                    <span class="status-icon">⚠️</span>
+                    <span class="status-text">Ready</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Control Button -->
+              <button class="control-btn" id="toggleTracking">
+                <i data-lucide="play"></i>
+                <span>Start Focus Session</span>
+              </button>
+
+              <!-- Session Timer -->
+              <div class="session-timer hidden" id="sessionTimer">
+                <i data-lucide="clock"></i>
+                <span id="timerDisplay">0:00</span>
+              </div>
+
+              <!-- Real-time Metrics -->
+              <div
+                id="realtimeMetrics"
+                class="hidden"
+                style="
+                  margin-top: 1rem;
+                  padding: 1rem;
+                  background: rgba(139, 92, 246, 0.1);
+                  border: 1px solid rgba(139, 92, 246, 0.2);
+                  border-radius: 1rem;
+                  font-size: 0.75rem;
+                "
+              >
+                <div
+                  style="
+                    font-weight: bold;
+                    margin-bottom: 0.5rem;
+                    color: #22d3ee;
+                  "
+                >
+                  📡 Real-Time Analysis
+                </div>
+                <div
+                  style="
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 0.5rem;
+                    color: #94a3b8;
+                  "
+                >
+                  <div>
+                    ⌨️ Typing:
+                    <span id="typingSpeed" style="color: #fff; font-weight: 600"
+                      >--</span
+                    >
+                  </div>
+                  <div>
+                    🖱️ Mouse:
+                    <span
+                      id="mouseActivity"
+                      style="color: #fff; font-weight: 600"
+                      >--</span
+                    >
+                  </div>
+                  <div>
+                    🔄 Tab Switches:
+                    <span id="tabCount" style="color: #fff; font-weight: 600"
+                      >0</span
+                    >
+                  </div>
+                  <div>
+                    😴 Fatigue:
+                    <span
+                      id="fatigueLevel"
+                      style="color: #fff; font-weight: 600"
+                      >0%</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stats & Tips Column -->
+          <div class="stats-column">
+            <!-- Quick Stats -->
+            <div class="card">
+              <h3 class="card-title-small">
+                <i data-lucide="activity"></i>
+                Today's Progress
+              </h3>
+              <div class="stats-grid">
+                <div class="stat-card stat-purple">
+                  <div class="stat-value">2.5h</div>
+                  <div class="stat-label">Focus Time</div>
+                </div>
+                <div class="stat-card stat-green">
+                  <div class="stat-value">87%</div>
+                  <div class="stat-label">Avg Flow</div>
+                </div>
+                <div class="stat-card stat-orange">
+                  <div class="stat-value">5</div>
+                  <div class="stat-label">Deep Work Sessions</div>
+                </div>
+                <div class="stat-card stat-pink">
+                  <div class="stat-value">12</div>
+                  <div class="stat-label">Tasks Completed</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- AI Insights -->
+            <div class="card">
+              <h3 class="card-title-small">
+                <i data-lucide="zap"></i>
+                AI Insights
+              </h3>
+              <div class="insights-list">
+                <div class="insight-item insight-purple">
+                  <p>
+                    🧠 Real-time AI analysis active. Your behavior patterns are
+                    being learned!
+                  </p>
+                </div>
+                <div class="insight-item insight-green">
+                  <p>
+                    ⚡ Start tracking to unlock personalized flow triggers and
+                    optimal work times.
+                  </p>
+                </div>
+                <div class="insight-item insight-orange">
+                  <p>
+                    🎯 Advanced features: Breathing exercises, Pomodoro mode,
+                    Focus blocker available!
+                  </p>
+                </div>
+              </div>
+
+              <!-- Advanced Features -->
+              <div
+                style="
+                  margin-top: 1rem;
+                  display: grid;
+                  grid-template-columns: repeat(2, 1fr);
+                  gap: 0.5rem;
+                "
+              >
+                <button
+                  onclick="startBreathingExercise()"
+                  class="quick-action-btn"
+                  style="font-size: 0.75rem"
+                >
+                  🧘 Breathing
+                </button>
+                <button
+                  onclick="startPomodoroMode()"
+                  class="quick-action-btn"
+                  style="font-size: 0.75rem"
+                >
+                  🍅 Pomodoro
+                </button>
+                <button
+                  onclick="enableFocusMode()"
+                  class="quick-action-btn"
+                  style="font-size: 0.75rem"
+                >
+                  🔒 Focus Mode
+                </button>
+                <button
+                  onclick="exportSessionData()"
+                  class="quick-action-btn"
+                  style="font-size: 0.75rem"
+                >
+                  📊 Export Data
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Dashboard Section -->
+      <section id="dashboard" class="section">
+        <div class="card">
+          <h2 class="card-title">
+            <i data-lucide="trending-up"></i>
+            Flow Analytics Dashboard
+          </h2>
+
+          <!-- Weekly Overview Stats -->
+          <div class="stats-grid-4">
+            <div class="overview-stat stat-purple">
+              <div class="overview-label">Total Focus Time</div>
+              <div class="overview-value">18.5h</div>
+              <div class="overview-change">+12% vs last week</div>
+            </div>
+            <div class="overview-stat stat-cyan">
+              <div class="overview-label">Avg Flow Score</div>
+              <div class="overview-value">82%</div>
+              <div class="overview-change">+8% vs last week</div>
+            </div>
+            <div class="overview-stat stat-green">
+              <div class="overview-label">Deep Work Sessions</div>
+              <div class="overview-value">34</div>
+              <div class="overview-change">+15% vs last week</div>
+            </div>
+            <div class="overview-stat stat-orange">
+              <div class="overview-label">Productivity Boost</div>
+              <div class="overview-value">2.3x</div>
+              <div class="overview-change">+25% vs last week</div>
+            </div>
+          </div>
+
+          <!-- Flow Score Chart -->
+          <div class="chart-container">
+            <h3 class="chart-title">Weekly Flow Pattern</h3>
+            <div class="bar-chart">
+              <div class="bar-wrapper" data-value="65">
+                <div class="bar" style="height: 65%">
+                  <div class="bar-tooltip">65% Flow</div>
+                </div>
+                <div class="bar-label">Mon</div>
+              </div>
+              <div class="bar-wrapper" data-value="72">
+                <div class="bar" style="height: 72%">
+                  <div class="bar-tooltip">72% Flow</div>
+                </div>
+                <div class="bar-label">Tue</div>
+              </div>
+              <div class="bar-wrapper" data-value="85">
+                <div class="bar" style="height: 85%">
+                  <div class="bar-tooltip">85% Flow</div>
+                </div>
+                <div class="bar-label">Wed</div>
+              </div>
+              <div class="bar-wrapper" data-value="78">
+                <div class="bar" style="height: 78%">
+                  <div class="bar-tooltip">78% Flow</div>
+                </div>
+                <div class="bar-label">Thu</div>
+              </div>
+              <div class="bar-wrapper" data-value="90">
+                <div class="bar" style="height: 90%">
+                  <div class="bar-tooltip">90% Flow</div>
+                </div>
+                <div class="bar-label">Fri</div>
+              </div>
+              <div class="bar-wrapper" data-value="88">
+                <div class="bar" style="height: 88%">
+                  <div class="bar-tooltip">88% Flow</div>
+                </div>
+                <div class="bar-label">Sat</div>
+              </div>
+              <div class="bar-wrapper" data-value="82">
+                <div class="bar" style="height: 82%">
+                  <div class="bar-tooltip">82% Flow</div>
+                </div>
+                <div class="bar-label">Sun</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Best Times & Distractions -->
+          <div class="grid-2">
+            <div class="analytics-section">
+              <h3 class="section-title">🏆 Best Focus Times</h3>
+              <div class="analytics-list">
+                <div class="analytics-item analytics-purple">
+                  <span>9:00 AM - 11:00 AM</span>
+                  <strong>95% avg</strong>
+                </div>
+                <div class="analytics-item analytics-purple">
+                  <span>2:00 PM - 4:00 PM</span>
+                  <strong>90% avg</strong>
+                </div>
+                <div class="analytics-item analytics-purple">
+                  <span>7:00 PM - 9:00 PM</span>
+                  <strong>85% avg</strong>
+                </div>
+              </div>
+            </div>
+
+            <div class="analytics-section">
+              <h3 class="section-title">🎯 Top Distractions</h3>
+              <div class="analytics-list">
+                <div class="analytics-item analytics-red">
+                  <span>Social Media</span>
+                  <strong>35 times</strong>
+                </div>
+                <div class="analytics-item analytics-red">
+                  <span>Email Checking</span>
+                  <strong>27 times</strong>
+                </div>
+                <div class="analytics-item analytics-red">
+                  <span>Phone Notifications</span>
+                  <strong>19 times</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- AI Coach Section -->
+      <section id="ai-coach" class="section">
+        <div class="card">
+          <h2 class="card-title">
+            <i data-lucide="message-square"></i>
+            AI Focus Coach
+          </h2>
+
+          <!-- Chat Messages -->
+          <div class="chat-container" id="chatContainer">
+            <div class="chat-message bot-message">
+              <div class="message-avatar">
+                <i data-lucide="brain"></i>
+              </div>
+              <div class="message-content">
+                <div class="message-author">FlowZone AI</div>
+                <p>
+                  Hello! I'm your AI focus coach. I can help you improve
+                  concentration, build better habits, and reach peak
+                  productivity. What would you like to work on today?
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="quick-actions">
+            <button class="quick-action-btn" data-prompt="How to focus better?">
+              How to focus better?
+            </button>
+            <button class="quick-action-btn" data-prompt="Beat procrastination">
+              Beat procrastination
+            </button>
+            <button class="quick-action-btn" data-prompt="Manage distractions">
+              Manage distractions
+            </button>
+            <button class="quick-action-btn" data-prompt="Build habits">
+              Build habits
+            </button>
+          </div>
+
+          <!-- Chat Input -->
+          <!-- Chat Input -->
+          <div class="chat-input-container">
+            <input
+              type="text"
+              id="chatInput"
+              class="chat-input"
+              placeholder="Ask me anything about focus and productivity..."
+            />
+            <button class="voice-btn" id="voiceBtn" title="Voice input">
+             <i data-lucide="mic"></i>
+            </button>
+            <button class="send-btn" id="sendBtn">
+             <span id="sendBtnText">Send</span>
+           </button>
+          </div>
+
+    <!-- Modal for API Key Setup -->
+    <div class="modal hidden" id="apiModal">
+      <div class="modal-content">
+        <h2>Setup Gemini API Key</h2>
+        <p>
+          To use the AI Coach feature, please enter your Google Gemini API key:
+        </p>
+        <input
+          type="text"
+          id="apiKeyInput"
+          placeholder="Enter your API key..."
+          class="api-input"
+        />
+        <div class="modal-actions">
+          <button class="modal-btn modal-btn-secondary" id="skipApiBtn">
+            Skip for Now
+          </button>
+          <button class="modal-btn modal-btn-primary" id="saveApiBtn">
+            Save & Continue
+          </button>
+        </div>
+        <p class="api-help">
+          Get your free API key at:
+          <a href="https://makersuite.google.com/app/apikey" target="_blank"
+            >Google AI Studio</a
+          >
+        </p>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <!-- At the bottom of index.html, replace the scripts section: -->
+
+    <!-- Scripts - Load in order -->
+    <script src="app-part1-core.js"></script>
+    <script src="app-part2-ai.js"></script>
+    <script src="app-part3-session.js"></script>
+    <script src="app-part4-ui.js"></script>
+    <script>
+      // Initialize Lucide icons
+      if (typeof lucide !== "undefined") {
+        lucide.createIcons();
+      }
+    </script>
+  </body>
+</html>
