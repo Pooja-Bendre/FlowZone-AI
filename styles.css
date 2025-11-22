@@ -1416,4 +1416,133 @@ input:focus-visible {
 .voice-btn svg {
   width: 1.25rem;
   height: 1.25rem;
+
+}
+/* ============================================
+   MARKDOWN MESSAGE STYLING
+   ============================================ */
+
+.message-text {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.message-text h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 1rem 0 0.5rem 0;
+}
+
+.message-text h3:first-child {
+  margin-top: 0;
+}
+
+.message-text p {
+  margin: 0.75rem 0;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.message-text strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.message-text em {
+  color: var(--cyan-400);
+  font-style: italic;
+}
+
+.message-text ul,
+.message-text ol {
+  margin: 0.75rem 0;
+  padding-left: 1.5rem;
+}
+
+.message-text li {
+  margin: 0.5rem 0;
+  color: var(--text-secondary);
+}
+
+.message-text li strong {
+  color: var(--text-primary);
+}
+
+.message-text code {
+  background: rgba(139, 92, 246, 0.2);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-family: 'Courier New', monospace;
+  font-size: 0.875em;
+  color: var(--cyan-400);
+}
+
+.message-text pre {
+  background: rgba(15, 23, 42, 0.5);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.message-text pre code {
+  background: none;
+  padding: 0;
+  color: var(--text-secondary);
+}
+
+.message-text blockquote {
+  border-left: 3px solid var(--purple-500);
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.message-text a {
+  color: var(--cyan-400);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.message-text a:hover {
+  color: var(--cyan-500);
+  text-decoration: underline;
+}
+
+/* Better list styling */
+.message-text ul li::marker {
+  color: var(--purple-500);
+}
+
+.message-text ol li::marker {
+  color: var(--cyan-400);
+  font-weight: 600;
+}
+
+/* Numbered steps styling */
+.message-text ol {
+  counter-reset: item;
+}
+
+.message-text ol li {
+  display: block;
+}
+
+.message-text ol li:before {
+  content: counter(item) ". ";
+  counter-increment: item;
+  color: var(--cyan-400);
+  font-weight: 700;
+  margin-right: 0.5rem;
+}
+
+/* Horizontal rule */
+.message-text hr {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 1rem 0;
 }
